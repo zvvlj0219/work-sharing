@@ -8,6 +8,7 @@ import dotenv from 'dotenv'
 import type { GridFSBucket } from 'mongoose/node_modules/mongodb/mongodb'
 import g from 'gridfs-stream'
 import db from '../config/db'
+import portfolioSchema from '../models/Portfolio'
 
 const router = express.Router()
 
@@ -26,39 +27,26 @@ connection.once('open', () => {
 });
 
 
-const sampleData = {
-    portfolios: [
-        {
-            _id: new mongoose.Types.ObjectId('634e635b275e2120a7374d2b'),
-            image: {
-                // filename
-                name: 'U2FsdGVkX1p1L2u3S7W6wkzUg47eAb6oLqlMImNJNDFE1zKioe1Q2u3A4l.png'
-            },
-            username: 'sample1',
-            review: [],
-            work_url: 'sample@sample.com',
-            work_name: 'otaku',
-            description: 'otaku man otaku man otaku man otaku man otaku man',
-            review_avg: 0,
-            like:0,
-            dislike:0
-        }
-    ]
-}
-
-// get meta file
+/*
+* 作品一覧の取得
+* @params {object} req - req object
+* @params {object} res - res object
+*/
 router.get('/', async (req,res) => {
     await db.connect()
 
-    // api
-
-    const result = sampleData.portfolios
+    const result = await portfolioSchema.find().lean()
 
     await db.disconnect()
 
     return res.status(200).json({ portfolios: result })
 })
 
+/*
+* 作品画像の取得
+* @params {object} req - req object
+* @params {object} res - res object
+*/
 router.get('/fetch/:filename', async (req,res) => {
     const { filename } = req.params
     if(!filename) return res.status(400).json({ msg: 'not found filename'})

@@ -3,6 +3,10 @@ import multer from 'multer'
 import path from 'path';
 import {GridFsStorage} from 'multer-gridfs-storage'
 
+import dotenv from 'dotenv'
+dotenv.config()
+
+
 if(!process.env.MONGODB_URI){
     throw new Error('url not found')
 }
