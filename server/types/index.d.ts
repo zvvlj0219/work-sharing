@@ -1,19 +1,18 @@
-import { ObjectId } from "mongoose"
+import { ObjectId } from 'mongoose'
 
 export type Portfolio = {
-    _id: ObjectId,
+    _id: ObjectId
     image: {
         name: string
-    },
-    // image: File,
+    }
     username: string
     review: Review[]
     work_url: string
     work_name: string
     description: string
-    review_avg: number,
-    like:number,
-    dislike:number
+    review_avg: number
+    like: number
+    dislike: number
 }
 
 export type Review = {

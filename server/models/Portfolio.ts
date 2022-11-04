@@ -2,17 +2,17 @@ import mongoose, { models, ObjectId } from 'mongoose'
 import type { Review } from '../types'
 
 interface PortfolioDoc extends mongoose.Document {
-    _id: ObjectId;
+    _id: ObjectId
     image: {
-        name: string;
-    };
-    username: string;
-    review: Review[];
-    work_url: string;
-    work_name: string;
-    description: string;
-    review_avg: number;
-    like: number;
+        name: string
+    }
+    username: string
+    review: Review[]
+    work_url: string
+    work_name: string
+    description: string
+    review_avg: number
+    like: number
     dislike: number
 }
 
@@ -31,7 +31,7 @@ const portfoiloSchema = new mongoose.Schema(
             require: true
         },
         review: {
-            type: Array,
+            type: Array
         },
         work_url: {
             type: String,
@@ -46,18 +46,18 @@ const portfoiloSchema = new mongoose.Schema(
             require: true
         },
         review_avg: {
-            type: Number,
+            type: Number
         },
         like: {
-            type: Number,
+            type: Number
         },
         dislike: {
-            type: Number,
-        },
+            type: Number
+        }
     },
     {
         timestamps: true
-    },
+    }
 )
 
 const schema = models.Portfolio
