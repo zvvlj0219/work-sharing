@@ -6,7 +6,8 @@
   "scripts": {
     "server": "nodemon dist",
     "build:server": "tsc -p ./tsconfig.json",
-    "format": "prettier --write server"
+    "format": "prettier --write server",
+    "lint:server": "eslint server"
   },
   "dependencies": {
     "cors": "^2.8.5",

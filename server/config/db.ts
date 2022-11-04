@@ -1,12 +1,16 @@
-import mongoose from 'mongoose'
+import mongoose, {ObjectId} from 'mongoose'
 
-// ConnectionStates {
-//     disconnected: 0,
-//     connected: 1,
-//     connecting: 2,
-//     disconnecting: 3,
-//     uninitialized: 99,
-// }
+
+/*
+ * mongodb コネクションステータス
+ * ConnectionStates {
+ *     disconnected: 0,
+ *     connected: 1,
+ *     connecting: 2,
+ *     disconnecting: 3,
+ *     uninitialized: 99,
+ * }
+ */
 
 interface Connection {
     isConnected: number

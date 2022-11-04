@@ -1,34 +1,31 @@
 import express from 'express'
-import mongoose from 'mongoose'
-import CryptoJS from 'crypto-js';
-import multer from 'multer'
-import path from 'path';
-import {GridFsStorage} from 'multer-gridfs-storage'
-import dotenv from 'dotenv'
-import type { GridFSBucket } from 'mongoose/node_modules/mongodb/mongodb'
-import g from 'gridfs-stream'
-import db from '../config/db'
 import portfolioSchema from '../models/Portfolio'
-import { Review } from '../types';
+import { Review } from '../types'
 
 const router = express.Router()
 
 /*
-* レビューを追加
-* @params {object} req - req object
-* @params {object} res - res object
-*/
+ * レビューを追加
+ * @params {object} req - req object
+ * @params {object} res - res object
+ */
+interface PostBodyParams {
+    body: {
+        username: string
+        text: string
+        star: number
+        review_avg: number
+    }
+    params: {
+        id: string
+    }
+}
+
 router.post('/:id', async (req, res) => {
     const {
-        body: {
-            text,
-            username,
-            star
-        },
-        params: {
-            id
-        }
-    } = req
+        body: { username, text, star, review_avg },
+        params: { id }
+    } = req as PostBodyParams
 
     const new_review: Review = {
         createdAt: String(new Date()),
@@ -42,13 +39,89 @@ router.post('/:id', async (req, res) => {
         {
             $push: {
                 review: new_review
+            },
+            $set: {
+                review_avg
             }
+        },
+        {
+            returnDocument: 'after'
         }
     )
 
-    if(!result) return res.status(400).json({ msg: 'no found'})
+    if (!result) return res.status(400).json({ msg: 'no found' })
 
-    return res.status(200).json({ result})
+    return res.status(200).json({ result })
+})
+
+/*
+ * いいねボタン押下
+ * @params {object} req - req object
+ * @params {object} res - res object
+ */
+interface LikePost {
+    body: {
+        newlikeCount: number
+    }
+    params: {
+        id: string
+    }
+}
+
+router.post('/like/:id', async (req, res) => {
+    const {
+        params: { id },
+        body: { newlikeCount }
+    } = req as LikePost
+
+    const result = await portfolioSchema.findByIdAndUpdate(
+        id,
+        {
+            $set: {
+                like: newlikeCount
+            }
+        },
+        {
+            returnDocument: 'after'
+        }
+    )
+
+    return res.status(200).json({ msg: 'ok', result })
+})
+
+/*
+ * いまいちボタン押下
+ * @params {object} req - req object
+ * @params {object} res - res object
+ */
+interface DislikePost {
+    body: {
+        newdislikeCount: number
+    }
+    params: {
+        id: string
+    }
+}
+
+router.post('/dislike/:id', async (req, res) => {
+    const {
+        params: { id },
+        body: { newdislikeCount }
+    } = req as DislikePost
+
+    const result = await portfolioSchema.findByIdAndUpdate(
+        id,
+        {
+            $set: {
+                dislike: newdislikeCount
+            }
+        },
+        {
+            returnDocument: 'after'
+        }
+    )
+
+    return res.status(200).json({ msg: 'ok', result })
 })
 
 export default router
