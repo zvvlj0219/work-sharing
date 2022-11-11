@@ -1,6 +1,7 @@
 import express from 'express'
+import db from '../config/db'
 import portfolioSchema from '../models/Portfolio'
-import { Review } from '../types'
+import { Portfolio, Review } from '../types'
 
 const router = express.Router()
 
@@ -34,24 +35,28 @@ router.post('/:id', async (req, res) => {
         star
     }
 
-    const result = await portfolioSchema.findByIdAndUpdate(
-        id,
-        {
-            $push: {
-                review: new_review
+    const result = await portfolioSchema
+        .findByIdAndUpdate(
+            id,
+            {
+                $push: {
+                    review: new_review
+                },
+                $set: {
+                    review_avg
+                }
             },
-            $set: {
-                review_avg
+            {
+                returnDocument: 'after'
             }
-        },
-        {
-            returnDocument: 'after'
-        }
-    )
+        )
+        .lean()
 
     if (!result) return res.status(400).json({ msg: 'no found' })
 
-    return res.status(200).json({ result })
+    const convertedDocument = db.convertDocToObj<Portfolio>(result)
+
+    return res.status(200).json({ result: convertedDocument })
 })
 
 /*
@@ -74,19 +79,25 @@ router.post('/like/:id', async (req, res) => {
         body: { newlikeCount }
     } = req as LikePost
 
-    const result = await portfolioSchema.findByIdAndUpdate(
-        id,
-        {
-            $set: {
-                like: newlikeCount
+    const result = await portfolioSchema
+        .findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    like: newlikeCount
+                }
+            },
+            {
+                returnDocument: 'after'
             }
-        },
-        {
-            returnDocument: 'after'
-        }
-    )
+        )
+        .lean()
 
-    return res.status(200).json({ msg: 'ok', result })
+    if (!result) return res.status(400).json({ msg: 'no found' })
+
+    const convertedDocument = db.convertDocToObj<Portfolio>(result)
+
+    return res.status(200).json({ msg: 'ok', result: convertedDocument })
 })
 
 /*
@@ -109,19 +120,25 @@ router.post('/dislike/:id', async (req, res) => {
         body: { newdislikeCount }
     } = req as DislikePost
 
-    const result = await portfolioSchema.findByIdAndUpdate(
-        id,
-        {
-            $set: {
-                dislike: newdislikeCount
+    const result = await portfolioSchema
+        .findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    dislike: newdislikeCount
+                }
+            },
+            {
+                returnDocument: 'after'
             }
-        },
-        {
-            returnDocument: 'after'
-        }
-    )
+        )
+        .lean()
 
-    return res.status(200).json({ msg: 'ok', result })
+    if (!result) return res.status(400).json({ msg: 'no found' })
+
+    const convertedDocument = db.convertDocToObj<Portfolio>(result)
+
+    return res.status(200).json({ msg: 'ok', result: convertedDocument })
 })
 
 export default router
