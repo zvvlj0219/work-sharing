@@ -1,6 +1,5 @@
 import express from 'express'
 import cors from 'cors'
-import path from 'path'
 import dotenv from 'dotenv'
 import { corsOptions } from './config'
 import homeRoute from './routes/homeRoute'

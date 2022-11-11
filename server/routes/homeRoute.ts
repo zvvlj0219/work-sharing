@@ -4,6 +4,7 @@ import type { GridFSBucket } from 'mongoose/node_modules/mongodb/mongodb'
 import g from 'gridfs-stream'
 import db from '../config/db'
 import portfolioSchema from '../models/Portfolio'
+import type { Portfolio } from '../types'
 
 const router = express.Router()
 
@@ -31,9 +32,15 @@ router.get('/', async (req, res) => {
 
     const result = await portfolioSchema.find().lean()
 
+    if (!result) return res.status(400).json({ msg: 'not found documents' })
+
+    const convertedDocuments = result.map((doc) => {
+        return db.convertDocToObj<Portfolio>(doc)
+    })
+
     await db.disconnect()
 
-    return res.status(200).json({ portfolios: result })
+    return res.status(200).json({ portfolios: convertedDocuments })
 })
 
 /*
