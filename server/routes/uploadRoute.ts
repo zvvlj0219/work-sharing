@@ -49,8 +49,8 @@ router.post('/save_portfolio', async (req, res) => {
             work_name,
             description,
             review_avg: 0,
-            like: 0,
-            dislike: 0
+            like: [],
+            dislike: []
         })
 
         return res.status(200).json({ result: newPortfolio })

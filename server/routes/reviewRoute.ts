@@ -66,7 +66,9 @@ router.post('/:id', async (req, res) => {
  */
 interface LikePost {
     body: {
-        newlikeCount: number
+        newLike: {
+            id: string
+        }
     }
     params: {
         id: string
@@ -76,28 +78,63 @@ interface LikePost {
 router.post('/like/:id', async (req, res) => {
     const {
         params: { id },
-        body: { newlikeCount }
+        body: { newLike }
     } = req as LikePost
 
-    const result = await portfolioSchema
-        .findByIdAndUpdate(
-            id,
-            {
-                $set: {
-                    like: newlikeCount
+    const exsistedLike = await portfolioSchema.find({
+        id,
+        like: {
+            $in: newLike
+        }
+    })
+
+    if(exsistedLike.length !== 0) {
+        // すでにいいねしているので
+        // いいねを外す
+        const result = await portfolioSchema
+            .findByIdAndUpdate(
+                id,
+                {
+                    $pull: {
+                        like: newLike
+                    }
+                },
+                {
+                    returnDocument: 'after'
                 }
-            },
-            {
-                returnDocument: 'after'
-            }
-        )
-        .lean()
+            )
+            .lean()
 
-    if (!result) return res.status(400).json({ msg: 'no found' })
+        if (!result) return res.status(400).json({ msg: 'no found' })
 
-    const convertedDocument = db.convertDocToObj<Portfolio>(result)
+        const convertedDocument = db.convertDocToObj<Portfolio>(result)
+    
+        return res.status(200).json({ msg: 'ok', result: convertedDocument })
+    
+    } else {
+        //まだいいねしていないので
+        //いいねを追加する
+        const result = await portfolioSchema
+            .findByIdAndUpdate(
+                id,
+                {
+                    $push: {
+                        like: newLike
+                    }
+                },
+                {
+                    returnDocument: 'after'
+                }
+            )
+            .lean()
+    
+        if (!result) return res.status(400).json({ msg: 'no found' })
+    
+        const convertedDocument = db.convertDocToObj<Portfolio>(result)
+    
+        return res.status(200).json({ msg: 'ok', result: convertedDocument })
+    }
 
-    return res.status(200).json({ msg: 'ok', result: convertedDocument })
 })
 
 /*
@@ -107,7 +144,9 @@ router.post('/like/:id', async (req, res) => {
  */
 interface DislikePost {
     body: {
-        newdislikeCount: number
+        newDislike: {
+            id: string
+        }
     }
     params: {
         id: string
@@ -117,28 +156,62 @@ interface DislikePost {
 router.post('/dislike/:id', async (req, res) => {
     const {
         params: { id },
-        body: { newdislikeCount }
+        body: { newDislike }
     } = req as DislikePost
 
-    const result = await portfolioSchema
-        .findByIdAndUpdate(
-            id,
-            {
-                $set: {
-                    dislike: newdislikeCount
+    const exsistedDisLike = await portfolioSchema.find({
+        id,
+        dislike: {
+            $in: newDislike
+        }
+    })
+
+    if(exsistedDisLike.length !== 0) {
+        // すでにいまいちしているので
+        // いまいちを外す
+        const result = await portfolioSchema
+            .findByIdAndUpdate(
+                id,
+                {
+                    $pull: {
+                        dislike: newDislike
+                    }
+                },
+                {
+                    returnDocument: 'after'
                 }
-            },
-            {
-                returnDocument: 'after'
-            }
-        )
-        .lean()
+            )
+            .lean()
 
-    if (!result) return res.status(400).json({ msg: 'no found' })
+        if (!result) return res.status(400).json({ msg: 'no found' })
 
-    const convertedDocument = db.convertDocToObj<Portfolio>(result)
-
-    return res.status(200).json({ msg: 'ok', result: convertedDocument })
+        const convertedDocument = db.convertDocToObj<Portfolio>(result)
+    
+        return res.status(200).json({ msg: 'ok', result: convertedDocument })
+    
+    } else {
+        //まだいまいちしていないので
+        //いまいちを追加する
+        const result = await portfolioSchema
+            .findByIdAndUpdate(
+                id,
+                {
+                    $push: {
+                        dislike: newDislike
+                    }
+                },
+                {
+                    returnDocument: 'after'
+                }
+            )
+            .lean()
+    
+        if (!result) return res.status(400).json({ msg: 'no found' })
+    
+        const convertedDocument = db.convertDocToObj<Portfolio>(result)
+    
+        return res.status(200).json({ msg: 'ok', result: convertedDocument })
+    }
 })
 
 export default router
