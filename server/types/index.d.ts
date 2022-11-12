@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongoose'
+import { ObjectId, Date } from 'mongoose'
 
 export type Portfolio = {
     _id: ObjectId
@@ -11,8 +11,14 @@ export type Portfolio = {
     work_name: string
     description: string
     review_avg: number
-    like: number
-    dislike: number
+    like: {
+        id: string
+    }[]
+    dislike: {
+        id: string
+    }[]
+    createdAt: Date
+    updatedAt: Date
 }
 
 export type Review = {
