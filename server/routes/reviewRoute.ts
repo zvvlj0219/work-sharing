@@ -7,8 +7,8 @@ const router = express.Router()
 
 /*
  * レビューを追加
- * @params {object} req - req object
- * @params {object} res - res object
+ * @params {object} req - req object PostBodyParams
+ * @params {object} res - res object Portfolio
  */
 interface PostBodyParams {
     body: {
@@ -61,13 +61,13 @@ router.post('/:id', async (req, res) => {
 
 /*
  * いいねボタン押下
- * @params {object} req - req object
- * @params {object} res - res object
+ * @params {object} req - req object likePost
+ * @params {object} res - res object Portfolio
  */
 interface LikePost {
     body: {
         newLike: {
-            id: string
+            email: string
         }
     }
     params: {
@@ -81,14 +81,16 @@ router.post('/like/:id', async (req, res) => {
         body: { newLike }
     } = req as LikePost
 
-    const exsistedLike = await portfolioSchema.find({
-        id,
-        like: {
-            $in: newLike
-        }
+    const portfolioDucument = await portfolioSchema.find({
+        _id: id,
     })
 
-    if(exsistedLike.length !== 0) {
+    const portfolioObj = portfolioDucument
+        ? portfolioDucument[0]
+        : {} as typeof portfolioDucument
+
+
+    if(portfolioObj.like.length !== 0) {
         // すでにいいねしているので
         // いいねを外す
         const result = await portfolioSchema
@@ -114,12 +116,16 @@ router.post('/like/:id', async (req, res) => {
     } else {
         //まだいいねしていないので
         //いいねを追加する
+        // いまいちを押していたら外す
         const result = await portfolioSchema
             .findByIdAndUpdate(
                 id,
                 {
                     $push: {
                         like: newLike
+                    },
+                    $pull: {
+                        dislike: newLike
                     }
                 },
                 {
@@ -127,6 +133,7 @@ router.post('/like/:id', async (req, res) => {
                 }
             )
             .lean()
+        
     
         if (!result) return res.status(400).json({ msg: 'no found' })
     
@@ -139,13 +146,13 @@ router.post('/like/:id', async (req, res) => {
 
 /*
  * いまいちボタン押下
- * @params {object} req - req object
- * @params {object} res - res object
+ * @params {object} req - req object DislikePost
+ * @params {object} res - res object Portfolio
  */
 interface DislikePost {
     body: {
         newDislike: {
-            id: string
+            email: string
         }
     }
     params: {
@@ -159,14 +166,16 @@ router.post('/dislike/:id', async (req, res) => {
         body: { newDislike }
     } = req as DislikePost
 
-    const exsistedDisLike = await portfolioSchema.find({
-        id,
-        dislike: {
-            $in: newDislike
-        }
+    const portfolioDucument = await portfolioSchema.find({
+        _id: id,
     })
 
-    if(exsistedDisLike.length !== 0) {
+    const portfolioObj = portfolioDucument
+        ? portfolioDucument[0]
+        : {} as typeof portfolioDucument
+
+
+    if(portfolioObj.dislike.length !== 0) {
         // すでにいまいちしているので
         // いまいちを外す
         const result = await portfolioSchema
@@ -192,12 +201,16 @@ router.post('/dislike/:id', async (req, res) => {
     } else {
         //まだいまいちしていないので
         //いまいちを追加する
+        // いいねを押していたら外す
         const result = await portfolioSchema
             .findByIdAndUpdate(
                 id,
                 {
                     $push: {
                         dislike: newDislike
+                    },
+                    $pull: {
+                        like: newDislike
                     }
                 },
                 {
