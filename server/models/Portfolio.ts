@@ -55,10 +55,10 @@ const portfoiloSchema = new mongoose.Schema(
             type: Number
         },
         like: {
-            type: Array,
+            type: Array
         },
         dislike: {
-            type: Array,
+            type: Array
         }
     },
     {

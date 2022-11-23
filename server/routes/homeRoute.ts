@@ -28,8 +28,6 @@ connection.once('open', () => {
  * @params {object} res - res object
  */
 router.get('/', async (req, res) => {
-    await db.connect()
-
     const result = await portfolioSchema.find().lean()
 
     if (!result) return res.status(400).json({ msg: 'not found documents' })
@@ -37,8 +35,6 @@ router.get('/', async (req, res) => {
     const convertedDocuments = result.map((doc) => {
         return db.convertDocToObj<Portfolio>(doc)
     })
-
-    await db.disconnect()
 
     return res.status(200).json({ portfolios: convertedDocuments })
 })

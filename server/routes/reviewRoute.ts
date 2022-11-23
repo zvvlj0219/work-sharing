@@ -81,16 +81,15 @@ router.post('/like/:id', async (req, res) => {
         body: { newLike }
     } = req as LikePost
 
-    const portfolioDucument = await portfolioSchema.find({
-        _id: id,
+    const portfolioObj = await portfolioSchema.findById(id).lean()
+
+    if (!portfolioObj) return res.status(400).json({ msg: 'not found' })
+
+    const existedLikeIndex = portfolioObj.like.findIndex((likeobj) => {
+        return likeobj.email === newLike.email
     })
 
-    const portfolioObj = portfolioDucument
-        ? portfolioDucument[0]
-        : {} as typeof portfolioDucument
-
-
-    if(portfolioObj.like.length !== 0) {
+    if (existedLikeIndex !== -1) {
         // すでにいいねしているので
         // いいねを外す
         const result = await portfolioSchema
@@ -98,7 +97,9 @@ router.post('/like/:id', async (req, res) => {
                 id,
                 {
                     $pull: {
-                        like: newLike
+                        like: {
+                            email: newLike.email
+                        }
                     }
                 },
                 {
@@ -110,9 +111,8 @@ router.post('/like/:id', async (req, res) => {
         if (!result) return res.status(400).json({ msg: 'no found' })
 
         const convertedDocument = db.convertDocToObj<Portfolio>(result)
-    
+
         return res.status(200).json({ msg: 'ok', result: convertedDocument })
-    
     } else {
         //まだいいねしていないので
         //いいねを追加する
@@ -122,10 +122,14 @@ router.post('/like/:id', async (req, res) => {
                 id,
                 {
                     $push: {
-                        like: newLike
+                        like: {
+                            email: newLike.email
+                        }
                     },
                     $pull: {
-                        dislike: newLike
+                        dislike: {
+                            email: newLike.email
+                        }
                     }
                 },
                 {
@@ -133,15 +137,13 @@ router.post('/like/:id', async (req, res) => {
                 }
             )
             .lean()
-        
-    
+
         if (!result) return res.status(400).json({ msg: 'no found' })
-    
+
         const convertedDocument = db.convertDocToObj<Portfolio>(result)
-    
+
         return res.status(200).json({ msg: 'ok', result: convertedDocument })
     }
-
 })
 
 /*
@@ -166,16 +168,15 @@ router.post('/dislike/:id', async (req, res) => {
         body: { newDislike }
     } = req as DislikePost
 
-    const portfolioDucument = await portfolioSchema.find({
-        _id: id,
+    const portfolioObj = await portfolioSchema.findById(id).lean()
+
+    if (!portfolioObj) return res.status(400).json({ msg: 'not found' })
+
+    const existedLikeIndex = portfolioObj.dislike.findIndex((dislikeobj) => {
+        return dislikeobj.email === newDislike.email
     })
 
-    const portfolioObj = portfolioDucument
-        ? portfolioDucument[0]
-        : {} as typeof portfolioDucument
-
-
-    if(portfolioObj.dislike.length !== 0) {
+    if (existedLikeIndex !== -1) {
         // すでにいまいちしているので
         // いまいちを外す
         const result = await portfolioSchema
@@ -183,7 +184,9 @@ router.post('/dislike/:id', async (req, res) => {
                 id,
                 {
                     $pull: {
-                        dislike: newDislike
+                        dislike: {
+                            email: newDislike.email
+                        }
                     }
                 },
                 {
@@ -195,9 +198,8 @@ router.post('/dislike/:id', async (req, res) => {
         if (!result) return res.status(400).json({ msg: 'no found' })
 
         const convertedDocument = db.convertDocToObj<Portfolio>(result)
-    
+
         return res.status(200).json({ msg: 'ok', result: convertedDocument })
-    
     } else {
         //まだいまいちしていないので
         //いまいちを追加する
@@ -207,10 +209,14 @@ router.post('/dislike/:id', async (req, res) => {
                 id,
                 {
                     $push: {
-                        dislike: newDislike
+                        dislike: {
+                            email: newDislike.email
+                        }
                     },
                     $pull: {
-                        like: newDislike
+                        like: {
+                            email: newDislike.email
+                        }
                     }
                 },
                 {
@@ -218,11 +224,11 @@ router.post('/dislike/:id', async (req, res) => {
                 }
             )
             .lean()
-    
+
         if (!result) return res.status(400).json({ msg: 'no found' })
-    
+
         const convertedDocument = db.convertDocToObj<Portfolio>(result)
-    
+
         return res.status(200).json({ msg: 'ok', result: convertedDocument })
     }
 })
