@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "server": "nodemon dist",
+    "start": "node dist",
     "build:server": "tsc -p ./tsconfig.json",
     "format": "prettier --write server",
     "lint:server": "eslint server"
